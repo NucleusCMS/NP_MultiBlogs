@@ -956,9 +956,9 @@ class NP_MultiBlogs extends NucleusPlugin {
 		$order = (_CHARSET == 'EUC-JP') ? 'EUC-JP, UTF-8,' : 'UTF-8, EUC-JP,';
 		$post = mb_convert_encoding($post, _CHARSET, $order.' JIS, SJIS, ASCII');
 		$post = mb_convert_kana($post, 's');
-		$post = ereg_replace('[\\]+', '\\', $post);
-		$post = ereg_replace('[_%]+', '\\\0', $post);
-		$post = ereg_replace('[[:space:]]+', ' ', $post);
+		$post = preg_replace('@[\\]+@','\\',$post);
+		$post = preg_replace('@[_%]+@','\\\0',$post);
+		$post = preg_replace('@[[:space:]]+@',' ',$post);
 		$post = explode(' ', trim($post));
 		foreach ($post as $s2) {
 			$s2 = ' LIKE "%'.addslashes($s2).'%';
