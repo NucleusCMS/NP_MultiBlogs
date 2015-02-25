@@ -667,7 +667,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 					case($bitem > $ite && $bpage[0]) :
 						list($plink, $mpage) = explode('page=', $uri);
 						$max = ($items[2] == 'b') ? ceil(($bitem - $items[1]) / $ite + 1) : ceil($bitem / $ite);
-						$plink = htmlspecialchars($plink);
+						$plink = $this->hsc($plink);
 						switch(TRUE) {
 						case(intval($mpage) > 0) :
 							$mpages = (intval($mpage) - 1) * $max;
@@ -706,7 +706,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 					if ((($bitem > $ite || $items[0] == 's') && $bpage[0] == '2') || ($mform[0] && $bitem && $_GET['sbmt'])) {
 						$psh .= ' [*';
 						if (!($bitem > $ite && $bpage[0] == '2')) $psh .= 'Results ';
-						if($items[0] == 's' || ($_GET['que'] && $mform[0])) $psh .= 'for "<strong>'.htmlspecialchars($post).'</strong>": ';
+						if($items[0] == 's' || ($_GET['que'] && $mform[0])) $psh .= 'for "<strong>'.$this->hsc($post).'</strong>": ';
 						if ($bitem) $psh .= 'No.'.($mpages + 1).'-'.$max2.' of '.$bitem;
 						$psh .= '] ';
 					}
@@ -788,7 +788,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 				if ($blogid != $CONF['DefaultBlog']) $navi .= (!$cid) ? $blogname." &raquo; " : "<a href=\"".$bloglink."\">".$blogname."</a> &raquo; ";
 				if ($cid) $navi .= ($item['catid'] || $archive || $archivelist || $subcatid) ? "<a href=\"".$catlink."\">".$catname."</a> &raquo; " : $catname." &raquo; ";
 				$navi .= $q32.$item['title'];
-				if($archive) $navi .= 'Archive:'.htmlspecialchars($archive);
+				if($archive) $navi .= 'Archive:'.$this->hsc($archive);
 				if ($archivelist) $navi .= 'ArchiveList';
 				$navi .= "</div>\n";
 				if ($items[3] == 'a' || $items[3] == 'b') echo $navi;
@@ -1022,6 +1022,10 @@ class NP_MultiBlogs extends NucleusPlugin {
 			}
 		}
 		return;
+	}
+	function hsc($str) {
+		if(function_exists('hsc')) return hsc($str);
+		else                       return htmlspecialchars($str);
 	}
 }
 ?>
