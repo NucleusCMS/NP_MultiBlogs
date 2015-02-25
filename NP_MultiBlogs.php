@@ -80,7 +80,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 
 	function doTemplateCommentsVar(&$item, &$comment, $mode = '') {
 		if (!$mode || $mode=='i') {
-			$this->doTemplateVar(&$item, $mode);
+			$this->doTemplateVar($item, $mode);
 		}
 	}
 
