@@ -27,15 +27,17 @@ class NP_MultiBlogs extends NucleusPlugin {
 	function getAuthor() { return 'kimitake'; }
 	function getURL() { return 'http://japan.nucleuscms.org/bb/viewtopic.php?t=515'; }
 	function getVersion() { return '3.00'; }
+	function getMinNucleusVersion() { return '350'; }
 
 	function getDescription() { return 'It can replace &lt;%blog%&gt;, '.
 		'&lt;%item%&gt;, or &lt;%searchresults%&gt;. It is possible to link '.
 		'to other pages. You can specify blogs or categories to show. You can '.
 		'sort items by date, title(ascending or descending), or at random.';	}
 	
-		function supportsFeature($what) {
+	function supportsFeature($what) {
 		switch($what)	{
 			case 'SqlTablePrefix':
+			case 'SqlApi':
 				return 1;
 			default:
 				return 0;
@@ -105,8 +107,8 @@ class NP_MultiBlogs extends NucleusPlugin {
 		}
 		$q0 .= ' WHERE bnumber = iblog and catid = icat and inumber = '.$itemid;
 
-		$q1 = mysql_query($q0);
-		while($row = mysql_fetch_assoc($q1)) {
+		$q1 = sql_query($q0);
+		while($row = sql_fetch_assoc($q1)) {
 			$blink = quickQuery('SELECT burl as result FROM '.sql_table('blog')
 				.' WHERE bnumber = '.$row['iblog']);
 			$clink = createBlogidLink($row['iblog'], array('catid' => $row['icat']));
@@ -257,7 +259,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 				case ($mcat[0] == 'blog' || $items[0] == 'item' || !$catid):
 					$qq = sql_query('SELECT DISTINCT icat FROM '.sql_table('item').' WHERE iblog = '.$blogid);
 					$q31 = '(';
-					while($row = mysql_fetch_assoc($qq)) {
+					while($row = sql_fetch_assoc($qq)) {
 						$q31 .= 'p.categories REGEXP "(^|,)'.$row['icat'].'(,|$)" or ';
 					}
 					$q31 .= 'i.iblog = '.$blogid.')';
@@ -642,7 +644,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 				}
 				$query .= $que1;
 // non pageswitch
-				$bitem = mysql_num_rows(mysql_query($query));
+				$bitem = sql_num_rows(sql_query($query));
 				switch(TRUE) {
 				case($items[0] == 's' || $items[0] == 'c' || $items[0] == 'tb') :
 					$ite = $items[1];
@@ -737,7 +739,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 				echo "<div class=\"linkswitch\">\n";
 //				echo "[Prev or Next items]<br />\n";
 				switch(TRUE) {
-				case(($items[3] == 'a' || $items[3] == 'd') && mysql_num_rows(mysql_query($qprev))) :
+				case(($items[3] == 'a' || $items[3] == 'd') && sql_num_rows(sql_query($qprev))) :
 					echo "&laquo; Prev : ";
 					switch(TRUE) {
 					case($bp4[0] == 'multiblogs') :
@@ -746,7 +748,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 					default :
 						$blog -> showUsingQuery($bpage, $qprev, 1, 1, 1);
 					}
-				case(mysql_num_rows(mysql_query($qnext))) :
+				case(sql_num_rows(sql_query($qnext))) :
 					if ($items[3] == 'a' || $items[3] == 'd') echo "&raquo; Next : ";
 					switch(TRUE) {
 					case($itemid && $bp4[0] == 'multiblogs') :
@@ -765,7 +767,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 						$blog -> showUsingQuery($msort, $query, 1, 1, 1);
 					}
 				}
-				if (!($items[3] == 'a' || $items[3] == 'd') && mysql_num_rows(mysql_query($qprev)))	{
+				if (!($items[3] == 'a' || $items[3] == 'd') && sql_num_rows(sql_query($qprev)))	{
 					switch(TRUE) {
 					case($bp4[0] == 'multiblogs') :
 						$this -> MultiTitle($bp4, $qprev);
@@ -862,8 +864,8 @@ class NP_MultiBlogs extends NucleusPlugin {
 						$q111 .= 'catid';
 					}
 				}
-				$gcat = mysql_query($q111);
-				while($rcat = mysql_fetch_assoc($gcat)) {
+				$gcat = sql_query($q111);
+				while($rcat = sql_fetch_assoc($gcat)) {
 					switch(TRUE) {
 					case($mact) :
 						$q102 = ' and (p.categories REGEXP "(^|,)'.$rcat['catid'].'(,|$)" or i.icat = '.$rcat['catid'].')';
@@ -874,7 +876,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 					default:
 						$q102 = ' and i.icat = '.$rcat['catid'];
 					}
- 					$gcount = mysql_num_rows(mysql_query($q101.$q102.$q102a));
+ 					$gcount = sql_num_rows(sql_query($q101.$q102.$q102a));
 					$q103 = $q101.$q102.$q102a.$que1.' LIMIT '.$items[0];
 					switch(TRUE) {
 					case($catid && $mact) :
@@ -908,10 +910,10 @@ class NP_MultiBlogs extends NucleusPlugin {
 					}
 					echo '</'.$this -> getOption('group_tag').'>';
 				}
-				mysql_free_result($gcat);
+				sql_free_result($gcat);
 				$q103 = $q101.$q102e.$q102g.$que1.' LIMIT '.$items[0];
 
-				if ($catid && !$subcatid && $mact && $this -> getOption('group_other') && mysql_num_rows(mysql_query($q103))) {
+				if ($catid && !$subcatid && $mact && $this -> getOption('group_other') && sql_num_rows(sql_query($q103))) {
 					echo "<".$this -> getOption('group_tagt')." class=\"grouptitle\">".$this -> getOption('group_other')."</".$this -> getOption('group_tagt').">\n<".$this -> getOption('group_tag');
 					if ($this -> getOption('group_tag') != "") echo ' class="groupbody"';
 					echo ">";
@@ -940,7 +942,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 				if($bmode == 'fix') $query .= ' and i.iblog = '.$blogid;
 				if($mcat == 'cat') $query .= ' and i.icat = '.$catid;
 				$query .= ' LIMIT 1';
-				$bitem = mysql_num_rows(mysql_query($query));
+				$bitem = sql_num_rows(sql_query($query));
 				switch(TRUE) {
 				case($temple[0] == 'multiblogs' && $bitem) :
 					$this -> MultiTitle($temple, $query);
@@ -989,7 +991,7 @@ class NP_MultiBlogs extends NucleusPlugin {
 
 		$tj = intval(substr($temple[2], 2, 1));
 		$tp = sql_query($query);
-		while ($row = mysql_fetch_assoc($tp)) {
+		while ($row = sql_fetch_assoc($tp)) {
 			echo '<'.$m1.' class="multiblogs_top">';
 			switch(TRUE) {
 			case($temple[3]) :
@@ -1028,4 +1030,3 @@ class NP_MultiBlogs extends NucleusPlugin {
 		else                       return htmlspecialchars($str);
 	}
 }
-?>
